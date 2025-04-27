@@ -12,7 +12,6 @@ An AI-powered goal planning application that helps users create, track, and mana
 ## Project Structure
 
 - `frontend/`: React-based frontend application built with TypeScript and Vite
-- `backend/`: API server for handling goal generation and management
 
 ## Prerequisites
 
@@ -20,6 +19,7 @@ Before running the application, make sure you have the following installed:
 
 - Node.js (v16 or later)
 - npm or yarn
+- A running backend API service with endpoint for AI goal planning
 
 ## Getting Started
 
@@ -33,12 +33,8 @@ Before running the application, make sure you have the following installed:
 
 2. Install dependencies
    ```
-   # Install backend dependencies
-   cd backend
-   npm install
-
    # Install frontend dependencies
-   cd ../frotend
+   cd frotend
    npm install
    ```
 
@@ -46,25 +42,19 @@ Before running the application, make sure you have the following installed:
 
    Create a `.env` file in the `frotend` directory with the following:
    ```
-   VITE_API_URL=http://localhost:8000
+   VITE_API_URL=your_backend_api_url
    VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
    ```
 
 ### Running the Application
 
-1. Start the backend server
-   ```
-   cd backend
-   npm start
-   ```
-
-2. Start the frontend development server (in a new terminal)
+1. Start the frontend development server
    ```
    cd frotend
    npm run dev
    ```
 
-3. Open your browser and navigate to `http://localhost:5174` (or the port shown in your terminal)
+2. Open your browser and navigate to `http://localhost:5174` (or the port shown in your terminal)
 
 ## Usage
 
@@ -77,7 +67,6 @@ Before running the application, make sure you have the following installed:
 ## Technologies Used
 
 - **Frontend**: React, TypeScript, Vite, Clerk Authentication
-- **Backend**: Node.js, Express
 - **Styling**: CSS
 - **Authentication**: Clerk
 
