@@ -50,6 +50,7 @@ interface Task {
   title: string;
   content: string;
   duration: string;
+  completed?: boolean; // Add completion status
 }
 
 interface Goal {
@@ -96,6 +97,31 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, onChange, isEditin
   );
 };
 
+// ProgressBar component to visualize task completion
+interface ProgressBarProps {
+  completed: number;
+  total: number;
+}
+
+const ProgressBar: React.FC<ProgressBarProps> = ({ completed, total }) => {
+  const percentage = total > 0 ? (completed / total) * 100 : 0;
+  
+  return (
+    <div className="progress-container">
+      <div className="progress-label">
+        <span>Progress: {completed}/{total} tasks completed</span>
+        <span>{Math.round(percentage)}%</span>
+      </div>
+      <div className="progress-bar-track">
+        <div 
+          className="progress-bar-fill" 
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+};
+
 export default function GoalDetails() {
   const navigate = useNavigate();
   const { goalId } = useParams();
@@ -106,6 +132,7 @@ export default function GoalDetails() {
   const [error, setError] = useState('');
   const [editingFields, setEditingFields] = useState<{ [key: string]: boolean }>({});
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [progress, setProgress] = useState<{ completed: number; total: number }>({ completed: 0, total: 0 });
   
   // Clear notification after 5 seconds
   useEffect(() => {
@@ -341,6 +368,96 @@ export default function GoalDetails() {
     }
   };
 
+  // Function to toggle task completion status
+  const handleTaskCompletion = async (taskIndex: number, isCompleted: boolean) => {
+    if (!goal || !user || !goalId) return;
+    
+    try {
+      // Update UI optimistically
+      const updatedGoal = { ...goal };
+      const updatedTasks = [...updatedGoal.result.tasks];
+      updatedTasks[taskIndex] = { ...updatedTasks[taskIndex], completed: isCompleted };
+      updatedGoal.result.tasks = updatedTasks;
+      setGoal(updatedGoal);
+      
+      // Call API to update the completion status
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/task/${goalId}/completion?user_id=${user.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          task_index: taskIndex,
+          completed: isCompleted
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update task completion status');
+      }
+      
+      // Update progress after successful API call
+      fetchProgressInfo();
+      
+      setNotification({ 
+        message: isCompleted ? 'Task marked as completed' : 'Task marked as incomplete', 
+        type: 'success' 
+      });
+    } catch (error) {
+      console.error('Error updating task completion:', error);
+      // Revert UI changes if API call fails
+      if (goal) {
+        setGoal({ ...goal });
+      }
+      setNotification({ 
+        message: 'Failed to update task completion status', 
+        type: 'error' 
+      });
+    }
+  };
+  
+  // Function to calculate local progress based on completed tasks
+  const calculateLocalProgress = () => {
+    if (!goal) return { completed: 0, total: 0 };
+    
+    const total = goal.result.tasks.length;
+    const completed = goal.result.tasks.filter(task => task.completed).length;
+    
+    return { completed, total };
+  };
+  
+  // Function to fetch progress information
+  const fetchProgressInfo = async () => {
+    if (!goal || !user || !goalId) return;
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/task/${goalId}/progress?user_id=${user.id}`);
+      
+      if (!response.ok) {
+        console.error('Progress API returned error status:', response.status);
+        // Fall back to local calculation if API fails
+        setProgress(calculateLocalProgress());
+        return;
+      }
+      
+      const responseData = await response.json();
+      console.log('Progress API response:', responseData);
+      
+      // Check if the response has the expected structure
+      if (responseData && typeof responseData.completed === 'number' && typeof responseData.total === 'number') {
+        setProgress(responseData);
+      } else {
+        console.warn('Progress API returned unexpected structure, using local calculation instead');
+        // Use local calculation as fallback
+        setProgress(calculateLocalProgress());
+      }
+    } catch (error) {
+      console.error('Error fetching progress information:', error);
+      // Use local calculation as fallback
+      setProgress(calculateLocalProgress());
+    }
+  };
+
   useEffect(() => {
     const fetchGoal = async () => {
       try {
@@ -384,6 +501,13 @@ export default function GoalDetails() {
 
     fetchGoal();
   }, [goalId, user, isLoaded]);
+
+  // Add progress fetching to initial data loading
+  useEffect(() => {
+    if (goal && user && goalId) {
+      fetchProgressInfo();
+    }
+  }, [goal, user, goalId]);
 
   if (!isLoaded) {
     return <div className="loading">Loading...</div>;
@@ -449,11 +573,13 @@ export default function GoalDetails() {
         />
       </div>
 
+      <ProgressBar completed={progress.completed} total={progress.total} />
+
       <div className="tasks-grid">
         {goal.result.tasks.map((task, index) => (
           <div 
             key={index} 
-            className="task-card"
+            className={`task-card ${task.completed ? 'completed' : ''}`}
           >
             <div className="task-header">
               <h3 className="task-title">{formatText(cleanContent(task.title))}</h3>
@@ -629,6 +755,17 @@ export default function GoalDetails() {
                   )}
                 </div>
               </div>
+            </div>
+
+            <div className="task-completion">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={task.completed || false}
+                  onChange={(e) => handleTaskCompletion(index, e.target.checked)}
+                />
+                Mark as Completed
+              </label>
             </div>
           </div>
         ))}

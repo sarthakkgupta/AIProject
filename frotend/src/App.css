@@ -323,6 +323,7 @@ input:checked + .slider:before {
   position: relative;
   overflow-wrap: break-word;
   word-break: break-word;
+  min-height: 400px; /* Ensure minimum height for the card */
 }
 
 .task-card:hover {
@@ -332,6 +333,10 @@ input:checked + .slider:before {
 
 .task-card.selected {
   border-color: var(--primary-color);
+}
+
+.task-card.completed {
+  border-left: 4px solid #28a745;
 }
 
 .task-card h3 {
@@ -346,7 +351,21 @@ input:checked + .slider:before {
 }
 
 .task-card .editable-field {
-  margin: 0.5rem 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-content {
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: var(--border-radius);
 }
 
 .task-details {
@@ -473,7 +492,8 @@ input:checked + .slider:before {
 
 .editable-textarea {
   width: 100%;
-  min-height: 100px;
+  min-height: 300px; /* Further increased */
+  height: calc(100% - 40px); /* Calculate height to fill container minus space for buttons */
   padding: 0.75rem;
   border: 2px solid var(--primary-color);
   border-radius: var(--border-radius);
@@ -483,6 +503,8 @@ input:checked + .slider:before {
   margin-bottom: 0.5rem;
   background-color: white;
   color: var(--text-primary);
+  line-height: 1.5;
+  box-sizing: border-box;
 }
 
 .edit-button {
@@ -814,6 +836,9 @@ input:checked + .slider:before {
   margin-bottom: 0.75rem;
   overflow-wrap: break-word;
   word-break: break-word;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: var(--border-radius);
 }
 
 .task-content img,
@@ -1008,6 +1033,59 @@ input:checked + .slider:before {
 .duration-display button {
   font-size: 0.7rem;
   padding: 0.15rem 0.5rem;
+}
+
+.progress-container {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.progress-bar-track {
+  height: 10px;
+  background-color: #e9ecef;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--primary-color), #6366f1);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.task-completion {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.task-completion label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.task-completion input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
 }
 
 @media (max-width: 768px) {

@@ -224,10 +224,9 @@ export default function CreateGoal() {
             {plan.tasks.map((task, index) => (
               <div 
                 key={index} 
-                className={`task-card ${selectedTask === index ? 'selected' : ''}`}
-                onClick={() => setSelectedTask(selectedTask === index ? null : index)}
+                className="task-card"
               >
-                <h3>{formatText(cleanContent(task.title))}</h3>
+                <div className="task-number">{formatText(cleanContent(task.title))}</div>
                 
                 {task.duration && (
                   <div className="timeline-box">
@@ -235,24 +234,25 @@ export default function CreateGoal() {
                   </div>
                 )}
                 
-                {selectedTask === index && (
-                  <div className="task-details">
-                    <div className="task-section">
-                      <h4>Content</h4>
-                      <EditableField
-                        value={cleanContent(task.content)}
-                        onChange={(value) => {
-                          const updatedTasks = [...plan.tasks];
-                          updatedTasks[index] = { ...task, content: value };
-                          setPlan({ ...plan, tasks: updatedTasks });
-                        }}
-                        isEditing={editingFields[`content_${index}`] || false}
-                        onEdit={() => handleEdit(`content_${index}`)}
-                        onSave={() => handleSave(`content_${index}`, task.content, index)}
-                      />
-                    </div>
-                  </div>
-                )}
+                <div className="task-content">
+                  <ReactMarkdown components={{ a: LinkRenderer }} remarkPlugins={[remarkGfm]}>
+                    {cleanContent(task.content)}
+                  </ReactMarkdown>
+                </div>
+                
+                <div className="task-section">
+                  <EditableField
+                    value={cleanContent(task.content)}
+                    onChange={(value) => {
+                      const updatedTasks = [...plan.tasks];
+                      updatedTasks[index] = { ...task, content: value };
+                      setPlan({ ...plan, tasks: updatedTasks });
+                    }}
+                    isEditing={editingFields[`content_${index}`] || false}
+                    onEdit={() => handleEdit(`content_${index}`)}
+                    onSave={() => handleSave(`content_${index}`, task.content, index)}
+                  />
+                </div>
               </div>
             ))}
           </div>
