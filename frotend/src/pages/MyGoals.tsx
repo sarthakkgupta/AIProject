@@ -1,44 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
-import remarkGfm from 'remark-gfm';
-
-// Custom renderer for ReactMarkdown to make links open in a new tab
-const LinkRenderer = ({ href = '', children, ...props }: React.ComponentPropsWithoutRef<'a'>) => {
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
-      {children}
-    </a>
-  );
-};
 
 const formatText = (text: string) => {
   // Replace \n with actual line breaks
   return text.replace(/\\n/g, '\n');
 };
 
-// Clean the content by removing unwanted markdown syntax
 const cleanContent = (content: string) => {
   if (!content) return '';
   return content.replace(/\*\*/g, '');
-};
-
-// Format subtask content by removing "Subtask X" labels and styling resources
-const formatSubtasks = (content: string) => {
-  if (!content) return '';
-  
-  // First clean asterisks and line breaks
-  let formattedContent = cleanContent(formatText(content));
-  
-  // Replace "Subtask X:" or "[Subtask X]" pattern with the actual content
-  formattedContent = formattedContent.replace(/- (Subtask \d+:)/gi, '-');
-  formattedContent = formattedContent.replace(/\[(Subtask \d+)\]/gi, '');
-  
-  // Format resource text to be lighter
-  formattedContent = formattedContent.replace(/(Resource:.*?)(\n|$)/g, '<span class="resource-text">$1</span>$2');
-  
-  return formattedContent;
 };
 
 const formatDate = (timestamp: string) => {
@@ -86,7 +57,6 @@ export default function MyGoals() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('newest');
 
