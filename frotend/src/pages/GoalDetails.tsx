@@ -4,6 +4,7 @@ import { useAuth, useUser } from '@clerk/clerk-react';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
+import '../styles/GoalDetails.css'; // We'll create this CSS file next
 
 // Custom renderer for ReactMarkdown to make links open in a new tab
 const LinkRenderer = (props: React.ComponentPropsWithRef<'a'>) => {
@@ -507,6 +508,7 @@ export default function GoalDetails() {
     if (goal && user && goalId) {
       fetchProgressInfo();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goal, user, goalId]);
 
   if (!isLoaded) {

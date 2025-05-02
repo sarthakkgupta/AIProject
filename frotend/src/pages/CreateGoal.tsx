@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useUser, useAuth } from '@clerk/clerk-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import TypeWriter from '../components/TypeWriter'
 import type { PlanResponse } from '../types'
 
 // Custom renderer for ReactMarkdown to make links open in a new tab
@@ -67,9 +68,25 @@ export default function CreateGoal() {
   const [loading, setLoading] = useState(false)
   const [plan, setPlan] = useState<PlanResponse | null>(null)
   const [error, setError] = useState('')
-  const [selectedTask, setSelectedTask] = useState<number | null>(null)
   const [showAuthPrompt, setShowAuthPrompt] = useState(false)
   const [editingFields, setEditingFields] = useState<{ [key: string]: boolean }>({})
+  const [isInputFocused, setIsInputFocused] = useState(false)
+
+  // Example prompts for the typewriter effect
+  const examplePrompts = [
+    "Learn Python in 30 days",
+    "Roadmap to come up with a startup idea in space tech",
+    "Train for a marathon in 3 months",
+    "Launch a successful YouTube channel",
+    "Master machine learning fundamentals",
+    "Create a personal financial plan for retirement",
+  ];
+
+  const handleTypeWriterTextChange = () => {
+    if (!isInputFocused && !goal) {
+      // Only update the placeholder when input is not focused and user hasn't entered text
+    }
+  };
 
   const handleEdit = (fieldId: string) => {
     setEditingFields(prev => ({ ...prev, [fieldId]: true }));
@@ -161,53 +178,89 @@ export default function CreateGoal() {
   }
 
   return (
-    <div className="container">
-      <h1 style={{ marginBottom: '2rem', color: 'var(--text-primary)' }}>Create New Goal</h1>
+    <div className="futuristic-container">
+      <div className="create-goal-header">
+        <h1>Create Your <span className="highlight-text">AI-Powered</span> Plan</h1>
+        <p className="subtitle">Describe your goal and our AI will generate a detailed roadmap</p>
+      </div>
       
-      <form onSubmit={handleSubmit} className="card">
-        <div className="input-container">
-          <input
-            type="text"
-            className="input-field"
-            value={goal}
-            onChange={(e) => setGoal(e.target.value)}
-            placeholder="Enter your goal (e.g., 'Learn Python in 30 days')"
-            required
-          />
-          <button type="submit" className="button" disabled={loading}>
-            {loading ? 'Generating...' : 'Generate Plan'}
-          </button>
-        </div>
-        <div className="toggle-container">
-          <label className="toggle-switch">
+      <form onSubmit={handleSubmit} className="futuristic-card">
+        <div className="futuristic-input-container">
+          <div className="futuristic-input-wrapper">
+            <div className="futuristic-input-icon">✦</div>
             <input
-              type="checkbox"
-              checked={includeTimeline}
-              onChange={(e) => setIncludeTimeline(e.target.checked)}
+              type="text"
+              className="futuristic-input"
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setIsInputFocused(false)}
+              placeholder=""
+              required
             />
-            <span className="slider round"></span>
-          </label>
-          <span className="toggle-label">Include timeline</span>
+            {!goal && !isInputFocused && (
+              <div className="typewriter-placeholder">
+                <TypeWriter 
+                  phrases={examplePrompts} 
+                  typingSpeed={70} 
+                  pauseDuration={2000}
+                  onTextChange={handleTypeWriterTextChange}
+                />
+              </div>
+            )}
+            <button 
+              type="submit" 
+              className="futuristic-button pulse"
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="loading-animation">
+                  <span></span><span></span><span></span>
+                </div>
+              ) : (
+                <>Generate</>
+              )}
+            </button>
+          </div>
+          
+          <div className="timeline-toggle-container">
+            <label className="timeline-switch">
+              <input
+                type="checkbox"
+                checked={includeTimeline}
+                onChange={(e) => setIncludeTimeline(e.target.checked)}
+              />
+              <span className="timeline-slider"></span>
+            </label>
+            <span className="timeline-label">Include timeline</span>
+          </div>
         </div>
       </form>
 
       {showAuthPrompt && !isSignedIn && (
-        <div className="card auth-prompt">
-          <p>Please sign in to generate your plan</p>
-          <button className="button">Sign In</button>
+        <div className="futuristic-card auth-prompt-card">
+          <div className="auth-prompt-content">
+            <div className="auth-icon">🔒</div>
+            <p>Please sign in to generate your plan</p>
+            <button className="futuristic-button auth-button">Sign In</button>
+          </div>
         </div>
       )}
 
       {error && (
-        <div className="card error-card">
-          {error}
+        <div className="futuristic-card error-card">
+          <div className="error-icon">⚠️</div>
+          <p>{error}</p>
         </div>
       )}
 
       {plan && (
-        <div>
-          <div className="card objective-card">
-            <h2>Goal</h2>
+        <div className="generated-plan">
+          <div className="futuristic-card objective-card">
+            <div className="card-header">
+              <div className="card-header-icon">🎯</div>
+              <h2>Goal</h2>
+            </div>
             <EditableField
               value={formatText(plan.objective)}
               onChange={(value) => {
